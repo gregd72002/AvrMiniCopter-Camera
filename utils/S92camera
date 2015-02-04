@@ -1,0 +1,5 @@
+#!/bin/sh
+if [ "$1" == "start"  ]; then
+/usr/local/bin/camera_server -d
+fi
+exit 0;

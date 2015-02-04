@@ -15,8 +15,11 @@ all: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS)  -o camera_server $(LDFLAGS) $(CC_OPTS) 
 
 install:
+	$(INSTALL) -m 0755 -d $(DESTDIR)/etc/init.d
+	$(INSTALL) -m 0755 -d $(DESTDIR)/usr/local/bin
 	$(INSTALL) -m 755 camera_server $(DESTDIR)/usr/local/bin/
 	$(INSTALL) -m 755 camera_streamer.sh $(DESTDIR)/usr/local/bin/
+	$(INSTALL) -m 755 utils/S92camera $(DESTDIR)/etc/init.d/
 
 clean:
 	rm -rf camera_server
