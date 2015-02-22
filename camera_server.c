@@ -82,14 +82,14 @@ int add_client(struct sockaddr_in *c) {
 	return i;
 }
 
-void startCam(unsigned char ip[4],int port) {
+void startCam(unsigned char ip[4],int port, uint8_t type) {
 	if (cam_active) {
 		if (verbose) printf("Camera is already streaming!\n");
 		return;
 	}
 	int ret;
 	memset(cmd, '\0', 256);
-	sprintf(cmd, "%s start %i.%i.%i.%i %i",cam_cmd, ip[0],ip[1],ip[2],ip[3],port);
+	sprintf(cmd, "%s start %i.%i.%i.%i %i %i",cam_cmd, ip[0],ip[1],ip[2],ip[3],port,type);
 	if (verbose) printf("Executing: %s\n",cmd);
 	ret=system(cmd);
 
@@ -116,6 +116,7 @@ void processMsg(int client,unsigned char *buf, int len) {
 	int port;
 	int tmp;
 	int type;
+	uint8_t fpvtype;
 
 	type = buf[0];
 	if (verbose) printf("Received type: %i\n",type);
@@ -125,7 +126,8 @@ void processMsg(int client,unsigned char *buf, int len) {
 			memcpy(ip,buf+1,4);
 			memcpy(&tmp,buf+5,4);
 			port = ntohl(tmp);
-			if (!cam_active) startCam(ip,port);
+			fpvtype = buf[9];	
+			if (!cam_active) startCam(ip,port,fpvtype);
 			break;
 		case 1: stopCam(); 
 			clients[client] = 0;
@@ -236,7 +238,7 @@ int main(int argc, char **argv)
 
 		if (!stop && FD_ISSET(sock, &readfds)) {
 			ret = recvfrom(sock, buf, BUF_SIZE, 0, (struct sockaddr *)&tmpaddress, &addrlen);
-			if (ret!=9) {
+			if (ret!=10) {
 				printf("recvfrom error %i\n",ret);
 				continue;
 			}
